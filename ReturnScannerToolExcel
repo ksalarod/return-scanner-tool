@@ -1,0 +1,29 @@
+from openpyxl import Workbook, load_workbook
+
+def log_item():
+sku = sku_entry.get().strip()
+condition = condition_var.get()
+
+if not sku:
+messagebox.showwarning("Missing Info", "Please scan or enter a SKU.")
+return
+
+# Check if Excel file exists
+file_exists = Path(log_filename).with_suffix(".xlsx").exists()
+filepath = f"receiving_log_{today}.xlsx"
+
+if file_exists:
+wb = load_workbook(filepath)
+ws = wb.active
+else:
+wb = Workbook()
+ws = wb.active
+ws.append(["Timestamp", "SKU", "Status", "Condition"]) # Header row
+
+# Add row
+ws.append([datetime.now().isoformat(), sku, "Received", condition])
+wb.save(filepath)
+
+confirmation_label.config(text=f"✅ Logged: {sku} ({condition})")
+sku_entry.delete(0, tk.END)
+sku_entry.focus()
