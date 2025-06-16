@@ -1,0 +1,63 @@
+import tkinter as tk
+from tkinter import messagebox
+import csv
+from datetime import datetime
+from pathlib import Path
+
+# Create today's log file
+today = datetime.now().strftime("%Y-%m-%d")
+log_filename = f"receiving_log_{today}.csv"
+
+# Prepare log function
+def log_item():
+sku = sku_entry.get().strip()
+condition = condition_var.get()
+
+if not sku:
+messagebox.showwarning("Missing Info", "Please scan or enter a SKU.")
+return
+
+log_entry = {
+"timestamp": datetime.now().isoformat(),
+"sku": sku,
+"status": "Received",
+"condition": condition,
+}
+
+file_exists = Path(log_filename).exists()
+with open(log_filename, mode="a", newline="") as file:
+writer = csv.DictWriter(file, fieldnames=log_entry.keys())
+if not file_exists:
+writer.writeheader()
+writer.writerow(log_entry)
+
+confirmation_label.config(text=f"✅ Logged: {sku} ({condition})")
+sku_entry.delete(0, tk.END)
+sku_entry.focus()
+
+# Set up the UI
+window = tk.Tk()
+window.title("Return Scanner Tool")
+window.geometry("400x250")
+
+# SKU input
+tk.Label(window, text="Scan or Enter SKU:").pack(pady=5)
+sku_entry = tk.Entry(window, font=("Arial", 14))
+sku_entry.pack(pady=5)
+sku_entry.focus()
+
+# Condition selection
+condition_var = tk.StringVar(value="Good")
+tk.Label(window, text="Condition:").pack(pady=5)
+tk.Radiobutton(window, text="Good", variable=condition_var, value="Good").pack()
+tk.Radiobutton(window, text="Damaged", variable=condition_var, value="Damaged").pack()
+
+# Log button
+tk.Button(window, text="Log Item", command=log_item, bg="#4CAF50", fg="white", padx=10, pady=5).pack(pady=10)
+
+# Confirmation
+confirmation_label = tk.Label(window, text="")
+confirmation_label.pack(pady=5)
+
+# Run the app
+window.mainloop()
