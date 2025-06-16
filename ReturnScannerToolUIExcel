@@ -1,0 +1,94 @@
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font
+
+def log_item():
+   sku = sku_entry.get().strip()
+   condition = condition_var.get()
+   ra_number = ra_entry.get().strip()
+   customer_name = customer_entry.get().strip()
+
+   if not sku:
+      messagebox.showwarning("Missing Info", "Please scan or enter a SKU.")
+      return
+
+   filepath = f"{log_filename}.xlsx"
+   file_exists = Path(filepath).exists()
+
+   if file_exists:
+      wb = load_workbook(filepath)
+      ws = wb.active
+   else:
+      wb = Workbook()
+      ws = wb.active
+      headers = ["Timestamp", "SKU", "Condition", "Return Auth #", "Customer", "Status", "Notes"]
+      ws.append(headers)
+      for col in ws.iter_cols(min_row=1, max_row=1):
+         for cell in col:
+         cell.font = Font(bold=True)
+
+    ws.append([
+       datetime.now().isoformat(),
+       sku,
+       condition,
+       ra_number,
+       customer_name,
+      "Received",
+      ""
+])
+
+# Auto-size columns
+   for col in ws.columns:
+       max_length = 0
+       col_letter = col[0].column_letter
+       for cell in col:
+          try:
+             max_length = max(max_length, len(str(cell.value)))
+          except:
+             pass
+        ws.column_dimensions[col_letter].width = max_length + 2
+
+    wb.save(filepath)
+
+    confirmation_label.config(text=f"✅ Logged: {sku} ({condition})")
+    sku_entry.delete(0, tk.END)
+    ra_entry.delete(0, tk.END)
+    customer_entry.delete(0, tk.END)
+    sku_entry.focus()
+
+# Set up the UI
+window = tk.Tk()
+window.title("Return Scanner Tool")
+window.geometry("400x250")
+
+# SKU input
+tk.Label(window, text="Scan or Enter SKU:").pack(pady=5)
+sku_entry = tk.Entry(window, font=("Arial", 14))
+sku_entry.pack(pady=5)
+sku_entry.focus()
+
+# Condition selection
+condition_var = tk.StringVar(value="Good")
+tk.Label(window, text="Condition:").pack(pady=5)
+tk.Radiobutton(window, text="Good", variable=condition_var, value="Good").pack()
+tk.Radiobutton(window, text="Damaged", variable=condition_var, value="Damaged").pack()
+
+
+# Return Authorization #
+tk.Label(window, text="Return Authorization #:").pack(pady=2)
+ra_entry = tk.Entry(window, font=("Arial", 12))
+ra_entry.pack(pady=2)
+
+# Customer Name
+tk.Label(window, text="Customer Name:").pack(pady=2)
+customer_entry = tk.Entry(window, font=("Arial", 12))
+customer_entry.pack(pady=2)
+
+# Log button
+tk.Button(window, text="Log Item", command=log_item, bg="#4CAF50", fg="white", padx=10, pady=5).pack(pady=10)
+
+# Confirmation
+confirmation_label = tk.Label(window, text="")
+confirmation_label.pack(pady=5)
+
+# Run the app
+window.mainloop()
