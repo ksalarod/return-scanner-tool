@@ -1,0 +1,35 @@
+import csv
+from datetime import datetime
+from pathlib import Path
+
+# Create today's log filename
+today = datetime.now().strftime("%Y-%m-%d")
+log_filename = f"receiving_log_{today}.csv"
+
+# Loop until user exits
+while True:
+   sku = input("🔍 Scan item (or type SKU, or 'exit' to quit): ")
+   if sku.lower() == "exit":
+      print("Session ended ✅")
+      break
+
+   condition = input("📦 Condition? (Good/Damaged): ").strip().capitalize()
+   if condition not in ["Good", "Damaged"]:
+      print("⚠️ Invalid condition. Defaulting to 'Good'")
+      condition = "Good"
+
+   log_entry = {
+      "timestamp": datetime.now().isoformat(),
+      "sku": sku,
+      "status": "Received",
+      "condition": condition,
+}
+
+   file_exists = Path(log_filename).exists()
+   with open(log_filename, mode="a", newline="") as file:
+      writer = csv.DictWriter(file, fieldnames=log_entry.keys())
+      if not file_exists:
+         writer.writeheader()
+      writer.writerow(log_entry)
+
+   print(f"✅ Logged: {sku} ({condition})")
